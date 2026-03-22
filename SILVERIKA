@@ -36,10 +36,9 @@ local win = ui:new("SILVERIKA")
 -- Tabs
 local UITab1 = win:Tab("Announcements",'7734068321')
 local UITab2 = win:Tab("Scripts",'7734068321')
-local UITab3 = win:Tab("Instant Kill",'7734068321')
+local UITab3 = win:Tab("Player",'7734068321')
 local UITab4 = win:Tab("ESP",'7734068321')
 local UITab5 = win:Tab("Teleport",'7734068321')
-local UITab6 = win:Tab("Player",'7734068321')
 
 -- =====================
 -- Announcements tab
@@ -149,7 +148,7 @@ end)
 -- =====================
 -- Instant Kill / Fast Attack section
 -- =====================
-local attackTab = UITab3:section("Instant Kill", true)
+local attackTab = UITab3:section("Player", true)
 about:Button("Silver Hub", function()
     loadstring(game:HttpGet(
         "https://raw.githubusercontent.com/tikikiii/verbose-rotary-phone/refs/heads/main/Silver%20Hub?token=GHSAT0AAAAAADYNQOVTATURNEMRGFKGVF362N7ZAFA"
@@ -164,7 +163,6 @@ end)
 -- =====================
 -- Movement speed
 -- =====================
-local about = UITab6:section("Player", true)
 attackTab:Textbox("Speed", "TranslateAccelSpeed", "Enter speed value", function(Value)
     local speed = tonumber(Value)
     if speed then
